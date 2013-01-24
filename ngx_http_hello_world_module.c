@@ -55,8 +55,8 @@ static ngx_int_t ngx_http_hello_world_handler(ngx_http_request_t *r)
   ngx_buf_t    *b;
   ngx_chain_t   out;
 
-  r->headers_out.content_type.len = sizeof("text/plain") - 1;
-  r->headers_out.content_type.data = (u_char *) "text/plain";
+  r->headers_out.content_type.len = sizeof("text/funky") - 1;
+  r->headers_out.content_type.data = (u_char *) "text/funky";
 
   b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
 
