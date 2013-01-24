@@ -69,7 +69,7 @@ static ngx_int_t ngx_http_hello_world_handler(ngx_http_request_t *r)
   b->last_buf = 1;
 
   r->headers_out.status = NGX_HTTP_OK;
-  r->headers_out.content_length_n = sizeof(ngx_hello_world);
+  
   ngx_http_send_header(r);
 
   return ngx_http_output_filter(r, &out);
