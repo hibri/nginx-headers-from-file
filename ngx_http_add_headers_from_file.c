@@ -2,7 +2,8 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
-static char *ngx_http_add_headers_from_file(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static void * ngx_http_create_conf(ngx_conf_t *cf);
+
 static ngx_int_t ngx_http_add_headers_from_file_filter_init(ngx_conf_t *cf);
 
 typedef struct {
@@ -13,7 +14,7 @@ static ngx_command_t  ngx_http_add_headers_from_file_commands[] = {
 
   { ngx_string("add_headers_from_file"),
     NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-    ngx_http_add_headers_from_file,
+    ngx_conf_set_str_slot,
     NGX_HTTP_LOC_CONF_OFFSET,
     0,
     NULL },
@@ -34,7 +35,7 @@ static ngx_http_module_t  ngx_http_add_headers_from_file_ctx = {
   NULL,                          /* create server configuration */
   NULL,                          /* merge server configuration */
 
-  NULL,                          /* create location configuration */
+  ngx_http_create_conf,                          /* create location configuration */
   NULL                           /* merge location configuration */
 };
 
@@ -66,6 +67,9 @@ static ngx_int_t ngx_http_add_headers_from_file_filter_handler(ngx_http_request_
   r->headers_out.content_type.data = (u_char *) "text/funky";
   
   //
+  ngx_http_headers_file_t  *conf;
+  conf = ngx_http_get_module_loc_conf(r, ngx_http_add_headers_from_file_filter);
+  //
   ngx_table_elt_t  *h;
 
    
@@ -78,24 +82,26 @@ static ngx_int_t ngx_http_add_headers_from_file_filter_handler(ngx_http_request_
   ngx_str_set(&h->key, "X-Hibri");
 
   
-  h->value.len = sizeof("My Header Value") -1;
-  h->value.data = (u_char *) "My Header Value";
+  h->value.len = sizeof(conf->headers_file) -1;
+  h->value.data = conf->headers_file;
 
   //call the next filter in the chain
   return ngx_http_next_header_filter(r);
 }
 
-
-static char *ngx_http_add_headers_from_file(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+static void * ngx_http_create_conf(ngx_conf_t *cf)
 {
-  //this is where we need to read the configuration but not needed right now
-  //ngx_http_core_loc_conf_t  *clcf;
+    ngx_http_headers_file_t  *conf;
 
-  //clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
-  
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_headers_file_t));
+    if (conf == NULL) {
+        return NULL;
+    }
 
-  return NGX_CONF_OK;
+    return conf;
 }
+
+
 
 static ngx_int_t ngx_http_add_headers_from_file_filter_init(ngx_conf_t *cf)
 {
