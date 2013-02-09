@@ -13,10 +13,10 @@ typedef struct {
 static ngx_command_t  ngx_http_add_headers_from_file_commands[] = {
 
   { ngx_string("add_headers_from_file"),
-    NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+    NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
     ngx_conf_set_str_slot,
     NGX_HTTP_LOC_CONF_OFFSET,
-    0,
+    offsetof(ngx_http_headers_file_t, headers_file),
     NULL },
 
     ngx_null_command
@@ -82,8 +82,9 @@ static ngx_int_t ngx_http_add_headers_from_file_filter_handler(ngx_http_request_
   ngx_str_set(&h->key, "X-Hibri");
 
   
-  h->value.len = sizeof(conf->headers_file) -1;
-  h->value.data = conf->headers_file;
+  h->value = conf->headers_file;
+  //h->value.data = conf->headers_file;
+
 
   //call the next filter in the chain
   return ngx_http_next_header_filter(r);
@@ -97,10 +98,9 @@ static void * ngx_http_create_conf(ngx_conf_t *cf)
     if (conf == NULL) {
         return NULL;
     }
-
+   conf->headers_file = NGX_CONF_UNSET_PTR;
     return conf;
 }
-
 
 
 static ngx_int_t ngx_http_add_headers_from_file_filter_init(ngx_conf_t *cf)
